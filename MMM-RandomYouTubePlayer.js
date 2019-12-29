@@ -39,7 +39,7 @@ Module.register("MMM-RandomYouTubePlayer", {
         modestbranding: true,
 		autoplay: true,
         enablejsapi: true,
-        controls: true,
+        controls: false,
         cc_load_policy: true,
 		loop: false
     },
@@ -71,7 +71,7 @@ Module.register("MMM-RandomYouTubePlayer", {
                 wrapper.className = "";
                 playerDiv.id = "YT_Player";
                 wrapper.appendChild(playerDiv);
-
+                var numPl = Math.floor((Math.random() * 50) + 1);
                 self.player = new YT.Player("YT_Player", {
                     height: self.config.height,
                     width: self.config.width,
@@ -86,6 +86,8 @@ Module.register("MMM-RandomYouTubePlayer", {
                         controls: self.config.controls,
                         fs: self.config.fs,
                         cc_load_policy: self.config.cc_load_policy,
+                        index: numPl,
+                        shuffle: true,
                         loop: self.config.loop,
                     },
                     events: {
@@ -96,6 +98,7 @@ Module.register("MMM-RandomYouTubePlayer", {
             }, 2000);
         };
         document.querySelector("body").appendChild(el);
+
     },
     getDom: function() {
         var self = this;
@@ -114,7 +117,63 @@ Module.register("MMM-RandomYouTubePlayer", {
         var listArray = self.player.getPlaylist();
         var arrayLength = listArray.length;
         var index = Math.floor(Math.random() * arrayLength);
+        console.log(self.player.getPlaylistIndex());
         event.target.setShuffle(true);
-        event.target.playVideoAt(index);
-    }
+        //event.target.playVideoAt(3);
+        //self.player.playVideoAt(1);
+        console.log(event.target)
+        event.target.pauseVideo();
+
+    },
+
+    // Override the default NotificationRecieved function
+    notificationReceived: function (notification, payload, sender) {
+		if (notification === "MMM-YOUTUBE-PLAY") {
+		    console.log("Start playing:", notification, "payload: ", payload);
+		    self.player.playVideo();
+		}
+		if (notification === "MMM-YOUTUBE-PAUSE") {
+		    console.log("Pause playing:", notification, "payload: ", payload);
+		    self.player.pauseVideo();
+		}
+		if (notification === "MMM-YOUTUBE-PL") {
+		    console.log("Switching playlist:", notification, "payload: ", payload);
+		    self.player.pauseVideo();
+		    setTimeout(function() {
+                console.log("MMM-RandomYTPlayer: Video wrapper created!!!");
+                var wrapper = document.getElementById(self.identifier + "_wrapper"),
+                playerDiv = document.createElement("div");
+                wrapper.innerHTML = "";
+                wrapper.className = "";
+                playerDiv.id = "YT_Player";
+                wrapper.appendChild(playerDiv);
+                var numPl = Math.floor((Math.random() * 50) + 1);
+                self.player = new YT.Player("YT_Player", {
+                    height: self.config.height,
+                    width: self.config.width,
+                    playerVars: {
+                        listType: "playlist",
+                        list: payload['playlistid'],
+                        showinfo: self.config.showinfo,
+                        autoplay: self.config.autoplay,
+                        enablejsapi: self.config.enablejsapi,
+                        modestbranding: self.config.modestbranding,
+                        rel: self.config.rel,
+                        controls: self.config.controls,
+                        fs: self.config.fs,
+                        cc_load_policy: self.config.cc_load_policy,
+                        index: numPl,
+                        shuffle: true,
+                        loop: self.config.loop,
+                    },
+                    events: {
+                        onReady: self.onPlayerReady,
+                    },
+
+                });
+            }, 2000);
+
+		}
+    },
+
 });
