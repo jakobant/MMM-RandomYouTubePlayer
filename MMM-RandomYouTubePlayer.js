@@ -136,6 +136,10 @@ Module.register("MMM-RandomYouTubePlayer", {
 		    console.log("Pause playing:", notification, "payload: ", payload);
 		    self.player.pauseVideo();
 		}
+		if (notification === "MMM-YOUTUBE-NEXT") {
+		    console.log("Next playing:", notification, "payload: ", payload);
+		    self.player.nextVideo();
+		}
 		if (notification === "MMM-YOUTUBE-PL") {
 		    console.log("Switching playlist:", notification, "payload: ", payload);
 		    self.player.pauseVideo();
